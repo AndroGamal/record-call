@@ -1,6 +1,7 @@
 package com.example.andro.myapplication;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
@@ -13,12 +14,8 @@ import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.Toast;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity {
     static Switch x;
@@ -26,9 +23,10 @@ ListView l;
     ArrayList vector;
 Button b1,b2;
     File z;
-    String s,k="false";
+    String s;
     MediaPlayer myMediaPlayer;
-
+    static SharedPreferences.Editor enable;
+    static SharedPreferences read;
     @Override
     protected void onStart() {
         vector.clear();
@@ -56,12 +54,9 @@ Button b1,b2;
         b1=findViewById(R.id.button1);
         b2=findViewById(R.id.button2);
         vector=new ArrayList();
-       try {
-        k=new Scanner(new File("storage/sdcard0/.isStart.xml")).nextLine();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        if(k.equals("true")){
+        enable = getSharedPreferences("Enable", MODE_MULTI_PROCESS).edit();
+        read = getSharedPreferences("Enable", MODE_MULTI_PROCESS);
+        if(read.getBoolean("enable",false)){
             x.setChecked(true);
         }
         else { x.setChecked(false);}
@@ -74,22 +69,17 @@ Button b1,b2;
             public void onClick(View v) {
               if(x.isChecked())
                 {
+                    enable.putBoolean("enable",true);
+                    enable.commit();
                 startService(new Intent(MainActivity.this,my.class));
+
                 }
                 else
                 {
-                    try {
-                        FileOutputStream writer=  new FileOutputStream(new File("storage/sdcard0/.isStart.xml"),false);
-                        writer.write("false".getBytes());
-                        writer.close();
-                    }
-                    catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    enable.putBoolean("enable",false);
+                    enable.commit();
                   stopService(new Intent(MainActivity.this, my.class));
-
+                  my.onclose();
                 }
             }
         });

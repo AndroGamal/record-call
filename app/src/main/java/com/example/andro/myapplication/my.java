@@ -10,12 +10,10 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -40,9 +38,9 @@ public class my extends Service {
             MediaRecorder.OutputFormat.THREE_GPP};
     private String file_exts[] = {AUDIO_RECORDER_FILE_EXT_MP4,
             AUDIO_RECORDER_FILE_EXT_3GP};
-
+static private Timer timer;
     public void runCallRecording() {
-        new Timer().schedule(new TimerTask() {
+        timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 if (telephonyManager.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK) {
@@ -116,19 +114,20 @@ public class my extends Service {
                     .show();
         }
     };
+public static void onclose(){
+    try{timer.cancel();}
+    catch ( Exception e){
+        e.getStackTrace();
+    }
+    finally {
 
+    }
+}
     @Override
     public void onCreate() {
         super.onCreate();
-        try {
-            FileOutputStream writer = new FileOutputStream(new File("storage/sdcard0/.isStart.xml"), false);
-            writer.write("true".getBytes());
-            writer.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        onclose();
+        timer=new Timer();
         telephonyManager = (TelephonyManager) getSystemService(MainActivity.TELEPHONY_SERVICE);
     }
 
